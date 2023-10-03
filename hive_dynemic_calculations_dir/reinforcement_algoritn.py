@@ -25,19 +25,40 @@ class PI(th.nn.Module):
         self.log_probs_list = []
         self.rewards_list = []
     
-    def forward_throught_model(self, x):
-        self.pd_param = self.model(x)
+    def forward(self, x):
 
+        self.pd_param = self.model(x)
+    
     def act(self, state):
 
         self.x = th.from_numpy(state.astype(np.float32))
-        self.forward_throught_model(self.x)
-        self.pd = th.distributions.Categorical(logits=self.pd_param)
+        self.forward(self.x)
+        self.pd = th.distributions.Categorical(self.pd_param)
         self.action = self.pd.sample()
         self.log_prob = self.pd.log_prob(self.action)
         self.log_probs_list.append(self.log_prob)
 
-        return self.action.item()
+        return self.action
+
+
+def train(pi, optimizer):
+
+    T = len(pi.rewards_list)
+    rets = np.empty(T, dtype=np.float32)
+    future_ret = 0.0
+
+    for curent_t in range(T):
+        future_ret = pi.rewards_list[curent_t] + gamma * future_ret
+        rets[curent_t] = future_ret
+    
+    rets = th.tensor(rets)
+    log_probs_tensor = th.stack(pi.log_probs_list)
+    loss = -log_probs_tensor * rets
+    loss = th.sum(loss)
+    optimizer.zero_grad()
+    loss.backwards()
+    optimizer.step()
+
 
 
 def train(pi, optimizer):
@@ -69,14 +90,15 @@ def main():
     for epi in range(300):
         state = env.reset()[0]
         for t in range(200):
+            print(state)
             action = pi.act(state)
             print(action, state, sep="-_|-_")
-            state, reward, done, truncated, info = env.step(action)
+            state, reward, done, _ = env.step(action)
             pi.rewards_list.append(reward)
             env.render()
             if done:
                 break
-        
+
         loss = train(pi, optimizer)
         print(pi.rewards_list)
         total_reward = sum(pi.rewards_list)

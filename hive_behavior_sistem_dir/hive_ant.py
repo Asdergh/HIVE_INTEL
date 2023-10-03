@@ -7,16 +7,16 @@ class HIVE_ANT():
     
     def __init__(self) -> None:
         
-        self.id_low_register = ["abcdf"]
-        self.id_hight_register = ["ABCDF"]
-        self.id_number = ["12345"]
-        self.ant_id = f"#${rd.chioce(self.id_hight_register)}{rd.choice(self.id_hight_register)}{rd.choice(self.id_low_register)}\
-                            {rd.choice(self.id_low_register)}{rd.choice(self.id_low_register)}{rd.choice(self.id_hight_register)}#$"
 
+        self.ant_id = f"#${rd.chioce(['A', 'B', 'D', 'F'])}\
+        {rd.choice(['A', 'B', 'D', 'F'])}{rd.choice(['a', 'b', 'c', 'd', 'f'])}\
+            {rd.choice(['a', 'b', 'c', 'd', 'f'])}{rd.choice(['a', 'b', 'd', 'f'])}\
+                {rd.choice(['A', 'B', 'C', 'D', 'F'])}#$"
+        
         self.start_position = np.random.randint(-100, 100, size=3, dtype=np.float32)
         self.curent_position = np.zeros(3)
         
-    def get_cores(self):
+    def get_position(self):
         return self.curent_position
 
     def change_position(self, new_position_vector):
