@@ -85,6 +85,7 @@ def main():
     env = gm.make("CartPole-v0")
     in_dim = env.observation_space.shape[0]
     out_dim = env.action_space.n
+    print(in_dim, out_dim, sep="\n")
     pi = PI(in_dim, out_dim)
     optimizer = th.optim.Adam(pi.parameters(), lr=0.01)
     for epi in range(300):
