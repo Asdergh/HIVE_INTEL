@@ -6,6 +6,8 @@ import json as js
 import statistics as stat
 import pandas as pd
 
+from matplotlib.animation import FuncAnimation
+plt.style.use("dark_background")
 
 class HIVE_QUEEN():
     
@@ -229,86 +231,34 @@ class ENVIRONMENT():
             ]
         self.step_number += 1
         self.past_mean_distance = self.mean_distance
+
         print(self.past_mean_distance)
         print(self.hive_distances_database)
         return self.mean_distance, self.reward
-
-class STRATAGY_GENERATER(th.nn.Module):
-
-    def __init__(self, in_dim, out_dim, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
         
-        self.layers = [
-            th.nn.Linear(in_dim, 64),
-            th.nn.ReLU(),
-            th.nn.Linear(64, out_dim)
-        ]
-        self.main = th.nn.Sequential(*self.layers)
-        self.onpolicy_reset()
-        self.train()
-    
-    def onpolicy_reset(self):
-
-        self.log_probs_list = []
-        self.rewards_list = []
-    
-    def forward(self, state):
-        
-        self.pd_param = self.model(state)
-
-    def act(self, state):
-
-        self.state_net_output = th.from_numpy(state.astype(np.float32))
-        self.forward(self.state_net_output)
-        self.pd_distributed = th.distributions.Categorical(self.pd_param)
-        self.action = self.pd_distributed.sample()
-        self.log_pd_prob = self.pd_distributed.log_prob(self.action)
-        self.log_probs_list.append(self.log_pd_prob)
-
-        return self.action.item()
-
-
-
-
-class REINGORCEMENT_ALGHRITM():
-
-    def __init__(self, grad_learning_rate) -> None:
-        
-        self.grad_learning_rate = grad_learning_rate
-        self.pi_stratagy = STRATAGY_GENERATER()
-        self.optimizer = th.optim.Adam(self.pi_stratagy, lr=self.grad_learning_rate)
-
-
-    def train(self):
-
-        train_steps = len(self.pi_stratagy.rewards_list)
-        rets = np.empty(train_step, )
-        curent_ret = 0.0
-        self.gamma = 0.99
-
-        for train_step in train_steps:
-
-            curent_ret = self.pi_stratagy.rewards_list[train_step] + self.gamma * curent_ret
-            rets[train_step] = curent_ret
-        
-        rets_tensor = th.tensor(rets)
-        log_probs_tensor = th.stack(self.pi_stratagy.log_probs_list)
-        loss = -log_probs_tensor * rets_tensor
-        loss_tensor = th.sum(loss)
-
-        self.optimizer.zeros_grad()
-        loss_tensor.backward()
-        self.otpimizer.step()
-
-        
-
-
 
 
 if __name__ == "__main__":
 
-    env = ENVIRONMENT(swarm_size=12, action_step_size=32.12)
-    for t in range(200):
+    env = ENVIRONMENT(swarm_size=1000, action_step_size=12.12)
+    figure = plt.figure()
+    view_3d = figure.add_subplot(projection="3d")
+
+    def animation(curent_step):
+
+        view_3d.clear()
         state, reward = env.step()
-        print(36*"=", state, reward, env.total_reward, 36*"=", sep="\n")
+        print(f"state: [{state}], reward: [{reward}], total_reward: [{env.total_reward}]")
+
+        ants_position_x_vector = np.array([env.hive_members[ant_id].get_position()[0] for ant_id in env.hive_members.keys()])
+        ants_position_y_vector = np.array([env.hive_members[ant_id].get_position()[1] for ant_id in env.hive_members.keys()])
+        ants_position_z_vector = np.array([env.hive_members[ant_id].get_position()[2] for ant_id in env.hive_members.keys()])
+        hive_queen_position = env.hive_queen.get_position()
+
+        view_3d.scatter(ants_position_x_vector, ants_position_y_vector, ants_position_z_vector, c=ants_position_z_vector, cmap="twilight", s=1.56)
+        view_3d.scatter(hive_queen_position[0], hive_queen_position[1], hive_queen_position[2], color="red", s=100)
+
+    demo = FuncAnimation(figure, animation, interval=100)
+    plt.show()
+    
 
