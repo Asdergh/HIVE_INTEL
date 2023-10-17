@@ -51,7 +51,7 @@ class HIVE_QUEEN():
             self.curent_position[1] = self.curent_position[1] + rd.choice([-1, 1]) * rd.randint(-self.step_size, self.step_size)
             self.curent_position[2] = self.curent_position[2] + rd.choice([-1, 1]) * rd.randint(-self.step_size, self.step_size)
         
-        elif self.trajecotry_planing_mode:
+        elif self.trajectory_planing_mode:
 
             self.curent_position = self.trajectory_path_cores[self.step]
 
@@ -105,6 +105,7 @@ class HIVE_ANT():
 #------------------------------------#
 class ENVIRONMENT():
 
+    # в __init__ мы также задаем начальное состояние нашей среды
     def __init__(self, swarm_size, action_step_size=12.67) -> None:
         
         # variable swarm_size: колличество муравьев в улье
@@ -129,7 +130,7 @@ class ENVIRONMENT():
         self.swarm_size = swarm_size
         self.hive_members_connections = {}
         self.hive_members = {}
-        self.hive_queen = HIVE_QUEEN(random_walk_mode=True)
+        self.hive_queen = HIVE_QUEEN(trajectory_path_cores=True, random_walk_mode=False)
 
         self.reward = 1.0
         self.total_reward = 0.0
@@ -137,6 +138,7 @@ class ENVIRONMENT():
         self.states_list = []
 
         self.need_range = 45.67
+        self.ant_neighbours_need_range = 12.4
         self.step_number = 0
 
         self.action_step_size = action_step_size
@@ -152,26 +154,36 @@ class ENVIRONMENT():
                 if ant != sub_ant:
 
                     self.hive_members_connections[ant] = {
-                        f"neiborhood ant |====|{sub_ant}": 
+                        f"neightbour ant id: {sub_ant}": 
                         {
-                            "nb ant": self.hive_members[sub_ant],
+                            "neighbour ant": self.hive_members[ant],
                             "distance": self.hive_members[ant].get_position() - self.hive_members[sub_ant].get_position()
                         }
                     }
 
                 else:
                     pass
-        
+    
         self.hive_distances_database = pd.DataFrame(columns=[self.hive_members[ant].ant_id for ant in self.hive_members.keys()])
         self.past_mean_distance = 0.0
     
-    # reset the state
+    def get_curent_hive_info(self):
+
+        self.ant_connection_database = pd.from_dict(self.hive_members_connections)
+        self.ant_
+
+
+    # вернуть среду в значальное положение
     def reset(self):
 
         for ant in self.hive_members.keys():
             self.hive_members[ant].reset_position()
     
-    #change stats for learning
+    # расчет состояния среды представленного в дистанции между королевой улья и муровьем
+    # расчет возногрождения r дикретного:
+    # r = 1.0 если {E[t] < E[t - 1] and E[t] > R} или {E[t] > E[t - 1] and E[t] < R}
+    # r = -1.0 если {E[t] < E[t - 1] and E[t] < R} или {E[t] > E[t - 1] and E[t] > R}
+    # где E[t] -- математическое ожидание на тукущей итерации; E[t - 1] -- математическое ожидение на предыдущей итерацииж; R -- допустимый радиус орбиты
     def step(self):
         
         self.mean_distance = stat.mean(
@@ -198,26 +210,55 @@ class ENVIRONMENT():
         if (self.reward == 1.0) and (self.mean_distance > self.need_range):
 
             for ant in self.hive_members.keys():
+
                 new_cores = self.hive_members[ant].get_position() - np.random.normal(0.1, self.action_step_size)
                 self.hive_members[ant].change_position(new_cores)
+
         
         elif (self.reward == 1.0) and (self.mean_distance < self.need_range):
 
             for ant in self.hive_members.keys():
-                new_cores = self.hive_members[ant].get_position() + np.random.normal(0.1, self.action_step_size)
+                
+                new_cores_rel_queen = self.hive_members[ant].get_position() + np.random.normal(0.1, self.action_step_size)
                 self.hive_members[ant].change_position(new_cores)
-        
+                
+                for ant_neighbour in self.hive_members_connections[ant]:
+
+                    self.neighbour_distance_len = np.sqrt(ant_neighbour["distance"][0] ** 2 + ant_neighbour["distance"][1] ** 2 + ant_neighbour["distance"][2] ** 2)
+                    if self.neighbour_distance_len < self.neighbours_need_range:
+                        self.neighbour_new_cores = ant_neighbour["distance"] + 3.3412
+                        self.ant_neighbour["neighbour ant"].change_position(self.neighbour_new_cores)
+
+
+
+
         elif (self.reward == -1.0) and (self.mean_distance > self.need_range):
             
             for ant in self.hive_members.keys():
-                new_cores = self.hive_members[ant].get_position() + np.random.normal(0.1, self.action_step_size)
+                
+                new_cores_rel_queen = self.hive_members[ant].get_position() + np.random.normal(0.1, self.action_step_size)
                 self.hive_members[ant].change_position(new_cores)
-        
+
+                for ant_neighbour in self.hive_members_connections[ant]:
+
+                    self.neighbour_distance_len = np.sqrt(ant_neighbour["distance"][0] ** 2 + ant_neighbour["distance"][1] ** 2 + ant_neighbour["distance"][2] ** 2)
+                    if self.neighbour_distance_len < self.neighbours_need_range:
+                        self.neighbour_new_cores = ant_neighbour["distance"] + 3.3412
+                        self.ant_neighbour["neighbour ant"].change_position(self.neighbour_new_cores)
+
         elif (self.reward == -1.0) and (self.mean_distance < self.need_range):
 
             for ant in self.hive_members.keys():
-                new_cores = self.hive_members[ant].get_position() - np.random.normal(0.1, self.action_step_size)
+                
+                new_cores_rel_queen = self.hive_members[ant].get_position() + np.random.normal(0.1, self.action_step_size)
                 self.hive_members[ant].change_position(new_cores)
+
+                for ant_neighbour in self.hive_members_connections[ant]:
+
+                    self.neighbour_distance_len = np.sqrt(ant_neighbour["distance"][0] ** 2 + ant_neighbour["distance"][1] ** 2 + ant_neighbour["distance"][2] ** 2)
+                    if self.neighbour_distance_len < self.neighbours_need_range:
+                        self.neighbour_new_cores = ant_neighbour["distance"] + 3.3412
+                        self.ant_neighbour["neighbour ant"].change_position(self.neighbour_new_cores)
         
         self.states_list.append(self.mean_distance)
         self.rewards_list.append(self.reward)
@@ -240,13 +281,14 @@ class ENVIRONMENT():
 
 if __name__ == "__main__":
 
-    env = ENVIRONMENT(swarm_size=1000, action_step_size=12.12)
+    env = ENVIRONMENT(swarm_size=4, action_step_size=12.12)
     figure = plt.figure()
     view_3d = figure.add_subplot(projection="3d")
 
     def animation(curent_step):
 
         view_3d.clear()
+        env.hive_queen.change_position()
         state, reward = env.step()
         print(f"state: [{state}], reward: [{reward}], total_reward: [{env.total_reward}]")
 
@@ -255,10 +297,13 @@ if __name__ == "__main__":
         ants_position_z_vector = np.array([env.hive_members[ant_id].get_position()[2] for ant_id in env.hive_members.keys()])
         hive_queen_position = env.hive_queen.get_position()
 
-        view_3d.scatter(ants_position_x_vector, ants_position_y_vector, ants_position_z_vector, c=ants_position_z_vector, cmap="twilight", s=1.56)
-        view_3d.scatter(hive_queen_position[0], hive_queen_position[1], hive_queen_position[2], color="red", s=100)
+        view_3d.scatter(ants_position_x_vector, ants_position_y_vector, ants_position_z_vector, c=ants_position_z_vector, cmap="twilight", s=43.56, alpha=0.34)
+        view_3d.scatter(hive_queen_position[0], hive_queen_position[1], hive_queen_position[2], color="black", s=100)
+        view_3d.quiver(hive_queen_position[0], hive_queen_position[1], hive_queen_position[2], 32.12, 0, 0, color="blue")
+        view_3d.quiver(hive_queen_position[0], hive_queen_position[2], hive_queen_position[2], 0, 32.12, 0, color="red")
+        view_3d.quiver(hive_queen_position[0], hive_queen_position[2], hive_queen_position[2], 0, 0, 32.12, color="green")
 
-    demo = FuncAnimation(figure, animation, interval=100)
+    demo = FuncAnimation(figure, animation, interval=1)
     plt.show()
     
 
