@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../ffmpeg-6.0"
+		}
+	],
+	"settings": {}
+}

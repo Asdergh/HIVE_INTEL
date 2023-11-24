@@ -9,6 +9,8 @@ import pandas as pd
 from matplotlib.animation import FuncAnimation
 plt.style.use("dark_background")
 
+
+    
 class HIVE_QUEEN():
     
     # variable start_position: вектор стартового положения королевы
@@ -281,7 +283,7 @@ class ENVIRONMENT():
 
 if __name__ == "__main__":
 
-    env = ENVIRONMENT(swarm_size=4, action_step_size=12.12)
+    env = ENVIRONMENT(swarm_size=100, action_step_size=12.12)
     figure = plt.figure()
     view_3d = figure.add_subplot(projection="3d")
 
