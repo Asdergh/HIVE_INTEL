@@ -280,7 +280,7 @@ class ENVIRONMENT():
         return self.mean_distance, self.reward
         
 
-
+# TODO name of all variables was wrong so we need to accumulate there positions to ppload new targets so actualy we need to
 if __name__ == "__main__":
 
     env = ENVIRONMENT(swarm_size=100, action_step_size=12.12)
