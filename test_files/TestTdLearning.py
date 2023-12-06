@@ -28,7 +28,7 @@ class Environment():
              self.reward = -np.random.normal(0.09, 1.0)
         
         self.state_vector = action_vector
-        self.iteration += 1
+        #self.iteration += 1
         self.past_state = self.state_vector
         return self.state_vector, self.reward
 
@@ -66,12 +66,12 @@ class ActionChoiceAlgorithm(Environment):
             self.grade_model.add(tf.keras.layers.Dense(7, activation="relu"))
             self.grade_model.add(tf.keras.layers.Dense(1))
             self.grade_model.compile(
-                 optimizer="emsprop",
+                 optimizer="rmsprop",
                  loss="categorical_crossentropy",
                  metrics=["accuracy"]
             )
 
-            self.loss_function = np.zeros(shape=self.grade_model.shape)
+            self.loss_function = np.zeros(shape=self.learning_iterations)
 
 
 
