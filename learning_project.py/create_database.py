@@ -7,71 +7,77 @@ import pandas as pd
 
 class DataMaker():
 
-    def __init__(self, image_size, gray_mode, class_labels, samples_number, base_dir_name) -> None:
+    def __init__(self, image_size, gray_mode, class_labels, samples_number_per_class, base_dir_name) -> None:
         
         self.image_size = image_size
         self.gray_mode = gray_mode
         self.class_labels = class_labels
-        self.samples_number = samples_number
+        self.samples_number_per_class = samples_number_per_class
         self.base_dir_name = base_dir_name
         self.data_base_builded = False
+        self.curent_frame_number = 0
     
     def generate_data(self):
 
+        self.base_dir_train = os.path.join(self.base_dir_name, "train")
+        self.base_dir_validation = os.path.join(self.base_dir_name, "validation")
+        self.base_dir_test = os.path.join(self.base_dir_name, "test")
+
+        os.mkdir(self.base_dir_train)
+        os.mkdir(self.base_dir_validation)
+        os.mkdir(self.base_dir_test)
+
         for class_label in self.class_labels:
-
-            class_samples_train = os.path.join(self.base_dir_name, f"{class_label}_train")
-            class_samples_validation = os.path.join(self.base_dir_name, f"{class_label}_validation")
-            class_samples_test = os.path.join(self.base_dir_name, f"{class_label}_test")
-
-            os.mkdir(class_samples_train)
-            os.mkdir(class_samples_test)
-            os.mkdir(class_samples_validation)
 
             start_key = input("enter [Y] if you are ready to start loading data:\t")
             cap = cv2.VideoCapture(0)
             
             while True:
-
+                
                 if (start_key == "Y" or start_key == "y"):
-                    for frame_number in range(self.samples_number):
+                    
+                    print("test inf")
+                    for self.curent_frame_number in range(self.samples_number_per_class):
+                        
                         _, frame = cap.read()
-                        frame = cv2.resize(frame, (self.image_size[0], self.image_size[1]))
                         if self.gray_mode == True:
                             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                        cv2.imwrite(f"{class_samples_train}\\{frame_number}.jpg", frame)
-                        print(f"IMAGE WAS WRITEN IN FILE TRAIN: [{class_samples_train}\\{frame_number}.jpg]")
+                        frame = cv2.resize(frame, (self.image_size[0], self.image_size[1]))
+                        cv2.imwrite(f"{self.base_dir_train}\\{class_label}_{self.curent_frame_number}.jpg", frame)
+                        print(f"IMAGE WAS WRITEN IN TRAIN DIR: [{self.base_dir_train}\\{class_label}_{self.curent_frame_number}.jpg]")
+                    
+                    for self.curent_frame_number in range(self.samples_number_per_class):
 
-                    for frame_number in range(self.samples_number):
                         _, frame = cap.read()
-                        frame = cv2.resize(frame, (self.image_size[0], self.image_size[1]))
                         if self.gray_mode == True:
                             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                        cv2.imwrite(f"{class_samples_validation}\\{frame_number}.jpg", frame)
-                        print(f"IMAGE WAS WRITEN IN FILE VALIDATION: [{class_samples_train}\\{frame_number}.jpg]")
+                        frame = cv2.resize(frame, (self.image_size[0], self.image_size[1]))
+                        cv2.imwrite(f"{self.base_dir_validation}\\{class_label}_{self.curent_frame_number}.jpg", frame)
+                        print(f"IMAGE WAS WRITEN IN VALIDATION DIR: [{self.base_dir_validation}\\{class_label}_{self.curent_frame_number}.jpg]")
+                    
+                    for self.curent_frame_number in range(self.samples_number_per_class):
 
-                    for frame_number in range(self.samples_number):
                         _, frame = cap.read()
-                        frame = cv2.resize(frame, (self.image_size[0], self.image_size[1]))
                         if self.gray_mode == True:
                             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                        cv2.imwrite(f"{class_samples_test}\\{frame_number}.jpg", frame)
-                        print(f"IMAGE WAS WRITEN IN FILE TEST: [{class_samples_train}\\{frame_number}.jpg]")
+                        frame = cv2.resize(frame, (self.image_size[0], self.image_size[1]))
+                        cv2.imwrite(f"{self.base_dir_test}\\{class_label}_{self.curent_frame_number}.jpg", frame)
+                        print(f"IMAGE WAS WRITEN IN TEST DIR: [{self.base_dir_test}\\{class_label}_{self.curent_frame_number}.jpg]") 
 
                     break
-
+                
                 else:
-                    break
-        
-        return self.data_base_builded
+                    pass
+                
+
 
 
 data_generator_object = DataMaker(
     image_size=(214, 214),
     gray_mode=True,
     class_labels=["hand", "face", "lamp"],
-    samples_number=200,
-    base_dir_name="C:\\Users\\1\\Desktop\\reinforcment_deep_ML\\test_data_dir"
+    samples_number_per_class=200,
+    base_dir_name="C:\\Users\\1\\Desktop\\reinforcment_deep_ML\\data_dir"
 )
 
 data_generator_object.generate_data()
