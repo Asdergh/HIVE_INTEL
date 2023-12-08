@@ -19,10 +19,13 @@ class DataMaker():
     
     def generate_data(self):
 
+        self.base_dir_name = os.path.join(self.base_dir_name, "data_dir")
+
         self.base_dir_train = os.path.join(self.base_dir_name, "train")
         self.base_dir_validation = os.path.join(self.base_dir_name, "validation")
         self.base_dir_test = os.path.join(self.base_dir_name, "test")
 
+        os.mkdir(self.base_dir_name)
         os.mkdir(self.base_dir_train)
         os.mkdir(self.base_dir_validation)
         os.mkdir(self.base_dir_test)
@@ -32,6 +35,14 @@ class DataMaker():
             start_key = input("enter [Y] if you are ready to start loading data:\t")
             cap = cv2.VideoCapture(0)
             
+            class_dir_train = os.path.join(self.base_dir_train, class_label)
+            class_dir_test = os.path.join(self.base_dir_test, class_label)
+            class_dir_validation = os.path.join(self.base_dir_validation, class_label)
+            
+            os.mkdir(class_dir_train)
+            os.mkdir(class_dir_test)
+            os.mkdir(class_dir_validation)
+
             while True:
                 
                 if (start_key == "Y" or start_key == "y"):
@@ -43,8 +54,8 @@ class DataMaker():
                         if self.gray_mode == True:
                             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                         frame = cv2.resize(frame, (self.image_size[0], self.image_size[1]))
-                        cv2.imwrite(f"{self.base_dir_train}\\{class_label}_{self.curent_frame_number}.jpg", frame)
-                        print(f"IMAGE WAS WRITEN IN TRAIN DIR: [{self.base_dir_train}\\{class_label}_{self.curent_frame_number}.jpg]")
+                        cv2.imwrite(f"{class_dir_train}\\{class_label}_{self.curent_frame_number}.jpg", frame)
+                        print(f"IMAGE WAS WRITEN IN TRAIN DIR: [{class_dir_train}\\{class_label}_{self.curent_frame_number}.jpg]")
                     
                     for self.curent_frame_number in range(self.samples_number_per_class):
 
@@ -52,8 +63,8 @@ class DataMaker():
                         if self.gray_mode == True:
                             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                         frame = cv2.resize(frame, (self.image_size[0], self.image_size[1]))
-                        cv2.imwrite(f"{self.base_dir_validation}\\{class_label}_{self.curent_frame_number}.jpg", frame)
-                        print(f"IMAGE WAS WRITEN IN VALIDATION DIR: [{self.base_dir_validation}\\{class_label}_{self.curent_frame_number}.jpg]")
+                        cv2.imwrite(f"{class_dir_validation}\\{class_label}_{self.curent_frame_number}.jpg", frame)
+                        print(f"IMAGE WAS WRITEN IN VALIDATION DIR: [{class_dir_validation}\\{class_label}_{self.curent_frame_number}.jpg]")
                     
                     for self.curent_frame_number in range(self.samples_number_per_class):
 
@@ -61,8 +72,8 @@ class DataMaker():
                         if self.gray_mode == True:
                             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                         frame = cv2.resize(frame, (self.image_size[0], self.image_size[1]))
-                        cv2.imwrite(f"{self.base_dir_test}\\{class_label}_{self.curent_frame_number}.jpg", frame)
-                        print(f"IMAGE WAS WRITEN IN TEST DIR: [{self.base_dir_test}\\{class_label}_{self.curent_frame_number}.jpg]") 
+                        cv2.imwrite(f"{class_dir_test}\\{class_label}_{self.curent_frame_number}.jpg", frame)
+                        print(f"IMAGE WAS WRITEN IN TEST DIR: [{class_dir_test}\\{class_label}_{self.curent_frame_number}.jpg]") 
 
                     break
                 
@@ -77,11 +88,9 @@ data_generator_object = DataMaker(
     gray_mode=True,
     class_labels=["hand", "face", "lamp"],
     samples_number_per_class=200,
-    base_dir_name="C:\\Users\\1\\Desktop\\reinforcment_deep_ML\\data_dir"
+    base_dir_name="C:\\Users\\1\\Desktop\\reinforcment_deep_ML"
 )
 
-data_generator_object.generate_data()
-
-                        
+#data_generator_object.generate_data()      
 
 
