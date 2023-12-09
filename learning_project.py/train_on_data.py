@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import cv2
 
 from create_database import DataMaker
 
@@ -31,6 +32,7 @@ class ObjectDetector():
         self.conv_model.add(tf.keras.layers.Conv2D(64, (3, 3), activation="relu"))
         self.conv_model.add(tf.keras.layers.MaxPooling2D((2, 2)))
         self.conv_model.add(tf.keras.layers.Conv2D(64, (3, 3), activation="relu"))
+        self.conv_model.add(tf.keras.layers.MaxPooling2D((2, 2)))
         self.conv_model.add(tf.keras.layers.Conv2D(128, (3, 3), activation="relu"))
         self.conv_model.add(tf.keras.layers.MaxPooling2D((2, 2)))
         self.conv_model.add(tf.keras.layers.Conv2D(128, (3, 3), activation="relu"))
@@ -108,7 +110,19 @@ class ObjectDetector():
     
     def object_detection(self):
         
-        print(self.conv_model.output)
+        cap = cv2.VideoCapture(0)
+
+        while True:
+
+            _, frame = cap.read()
+            frame = np.asarray(frame)
+            frame = np.expand_dims(frame, axis=1)
+
+            prediction = self.conv_model.predict(frame)
+            curent_item_detected = self.conv_model[:np.argmax(prediction)]
+            last_conv_layer = self.conv_model.get_layer("")
+
+
         
 
 ODM = ObjectDetector()
